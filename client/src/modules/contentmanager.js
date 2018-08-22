@@ -225,7 +225,7 @@ export default class {
                         for (const dbPermsIndex in readPermissions[0].permissions) {
                             for (let i = readConfig.permissions.length - 1; i >= 0; --i) {
                                 if (readPermissions[0].permissions[dbPermsIndex] === readConfig.permissions[i]) {
-                                    Permissions.addPluginPermission(id, readConfig.permissions[i]);
+                                    Permissions.add(id, readConfig.permissions[i]);
                                     readConfig.permissions.splice(i, 1);
                                     break;
                                 }
@@ -326,7 +326,7 @@ export default class {
             const unloadPromise = content.emit('unload', reload);
 
             if (content.type === 'plugin') {
-                const unloadPermissions = Permissions.removePluginPermissions(content.id);
+                const unloadPermissions = Permissions.removeAll(content.id);
 
                 if (!force)
                     await unloadPermissions;

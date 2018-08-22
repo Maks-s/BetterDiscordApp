@@ -120,7 +120,7 @@ export default class extends ContentManager {
         }
 
         if (permissions && permissions.length)
-            await Permissions.addPluginPermissions(info.id, permissions);
+            await Permissions.addMultiple(info.id, permissions);
 
         return instance;
     }

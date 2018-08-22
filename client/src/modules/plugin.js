@@ -34,7 +34,7 @@ export default class Plugin extends Content {
      */
     async savePermissions() {
         try {
-            const permissions = Permissions.getPermissions(this.id);
+            const permissions = Permissions.getAll(this.id);
             if (!permissions.length)
                 return;
 

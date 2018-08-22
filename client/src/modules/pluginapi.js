@@ -386,7 +386,7 @@ export default class PluginApi {
      */
 
     async getPlugin(plugin_id) {
-        if (!Permissions.hasPermission(this.pluginInfo.id, 'GET_INSTALLED_COMPONENT'))
+        if (!Permissions.get(this.pluginInfo.id, 'GET_INSTALLED_COMPONENT'))
             throw {message: 'Missing GET_INSTALLED_COMPONENT permission'};
 
         return PluginManager.waitForPlugin(plugin_id);
@@ -406,7 +406,7 @@ export default class PluginApi {
      */
 
     async getTheme(theme_id) {
-        if (!Permissions.hasPermission(this.pluginInfo.id, 'GET_INSTALLED_COMPONENT'))
+        if (!Permissions.get(this.pluginInfo.id, 'GET_INSTALLED_COMPONENT'))
             throw {message: 'Missing GET_INSTALLED_COMPONENT permission'};
 
         return ThemeManager.waitForContent(theme_id);
@@ -426,7 +426,7 @@ export default class PluginApi {
      */
 
     async getModule(module_id) {
-        if (!Permissions.hasPermission(this.pluginInfo.id, 'GET_INSTALLED_COMPONENT'))
+        if (!Permissions.get(this.pluginInfo.id, 'GET_INSTALLED_COMPONENT'))
             throw {message: 'Missing GET_INSTALLED_COMPONENT permission'};
 
         return ExtModuleManager.waitForContent(module_id);

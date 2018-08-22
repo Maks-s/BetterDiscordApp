@@ -51,20 +51,20 @@ export default class {
      * @param {String} permission Permission to add
      * @return {Promise}
      */
-    static async addPluginPermission(id, permission) {
+    static async add(id, permission) {
         if (!PermissionMap[permission])
             return;
 
-        if (this.hasPermission(id, permission))
+        if (this.get(id, permission))
             return;
 
-        if (!this.pluginsPermissions)
-            this.pluginsPermissions = [];
+        if (!this.data)
+            this.data = [];
 
-        if (!this.pluginsPermissions[id])
-            this.pluginsPermissions[id] = [];
+        if (!this.data[id])
+            this.data[id] = [];
 
-        this.pluginsPermissions[id].push(permission);
+        this.data[id].push(permission);
     }
 
     /**
@@ -73,9 +73,9 @@ export default class {
      * @param {Array} permissions Array of permission to add
      * @return {Promise}
      */
-    static async addPluginPermissions(id, permissions) {
+    static async addMultiple(id, permissions) {
         for (const permission of permissions)
-            this.addPluginPermission(id, permission);
+            this.add(id, permission);
     }
 
     /**
@@ -84,13 +84,13 @@ export default class {
      * @param {String} permission Permission to remove
      * @return {Promise}
      */
-    static async removePluginPermission(id, permission) {
-        if (!this.pluginsPermissions || !this.pluginsPermissions[id])
+    static async remove(id, permission) {
+        if (!this.data || !this.data[id])
             return;
 
-        for (const index in this.pluginsPermissions[id]) {
-            if (this.pluginsPermissions[id][index] === permission) {
-                this.pluginsPermissions[id].splice(index, 1);
+        for (const index in this.data[id]) {
+            if (this.data[id][index] === permission) {
+                this.data[id].splice(index, 1);
                 break;
             }
         }
@@ -101,11 +101,11 @@ export default class {
      * @param {String} id Plugin's ID
      * @return {Promise}
      */
-    static async removePluginPermissions(id) {
-        if (!this.pluginsPermissions || !this.pluginsPermissions[id])
+    static async removeAll(id) {
+        if (!this.data || !this.data[id])
             return;
 
-        delete this.pluginsPermissions[id];
+        delete this.data[id];
     }
 
     /**
@@ -114,12 +114,12 @@ export default class {
      * @param {String} permission Permission to check
      * @return {Boolean}
      */
-    static hasPermission(id, permission) {
-        if (!this.pluginsPermissions || !this.pluginsPermissions[id])
+    static get(id, permission) {
+        if (!this.data || !this.data[id])
             return false;
 
-        for (const index in this.pluginsPermissions[id])
-            if (this.pluginsPermissions[id][index] === permission)
+        for (const index in this.data[id])
+            if (this.data[id][index] === permission)
                 return true;
 
         return false;
@@ -130,11 +130,11 @@ export default class {
      * @param {String} id Plugin's ID
      * @return {Array}
      */
-    static getPermissions(id) {
-        if (!this.pluginsPermissions || !this.pluginsPermissions[id])
+    static getAll(id) {
+        if (!this.data || !this.data[id])
             return [];
 
-        return this.pluginsPermissions[id];
+        return this.data[id];
     }
 
 }
