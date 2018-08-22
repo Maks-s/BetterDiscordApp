@@ -16,6 +16,7 @@ import { SettingsSet, ErrorEvent } from 'structs';
 import { Modals } from 'ui';
 import path from 'path';
 import Combokeys from 'combokeys';
+import { Permissions } from 'modules';
 
 /**
  * Base class for managing external content
@@ -216,6 +217,26 @@ export default class {
                 Logger.warn(this.moduleName, [`Failed reading config for ${this.contentType} ${readConfig.info.name} in ${dirName}`, err]);
             }
 
+            if (this.contentType === 'plugin') {
+                try {
+                    const id = readConfig.info.id || readConfig.info.name.toLowerCase().replace(/[^a-zA-Z0-9-]/g, '-').replace(/--/g, '-');
+                    const readPermissions = await Database.find({ type: `plugin-permissions`, id });
+                    if (readPermissions.length) {
+                        for (const dbPermsIndex in readPermissions[0].permissions) {
+                            for (let i = readConfig.permissions.length - 1; i >= 0; --i) {
+                                if (readPermissions[0].permissions[dbPermsIndex] === readConfig.permissions[i]) {
+                                    Permissions.addPluginPermission(id, readConfig.permissions[i]);
+                                    readConfig.permissions.splice(i, 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } catch (err) {
+                    Logger.warn(this.moduleName, [`Failed reading permissions for ${this.contentType} ${readConfig.info.name} in ${dirName}`, err]);
+                }
+            }
+
             userConfig.config = defaultConfig.clone({ settings: userConfig.config });
             userConfig.config.setSaved();
 
@@ -247,6 +268,9 @@ export default class {
             if (!content) return undefined;
             if (!reload && this.getContentById(content.id))
                 throw {message: `A ${this.contentType} with the ID ${content.id} already exists.`};
+
+            if (!reload && readConfig.permissions && readConfig.permissions.length && this.contentType === 'plugin')
+                content.savePermissions();
 
             if (reload) this.localContent.splice(index, 1, content);
             else this.localContent.push(content);
@@ -300,6 +324,13 @@ export default class {
         try {
             const disablePromise = content.disable(false);
             const unloadPromise = content.emit('unload', reload);
+
+            if (content.type === 'plugin') {
+                const unloadPermissions = Permissions.removePluginPermissions(content.id);
+
+                if (!force)
+                    await unloadPermissions;
+            }
 
             if (!force) {
                 await disablePromise;

@@ -75,12 +75,9 @@ export default class extends ContentManager {
 
     static get loadContent() { return this.loadPlugin }
     static async loadPlugin(paths, configs, info, main, dependencies, permissions, mainExport) {
-        if (permissions && permissions.length > 0) {
-            for (const perm of permissions) {
-                Logger.log(this.moduleName, `Permission: ${Permissions.permissionText(perm).HEADER} - ${Permissions.permissionText(perm).BODY}`);
-            }
+        if (permissions && permissions.length) {
             try {
-                const allowed = await Modals.permissions(`${info.name} wants to:`, info.name, permissions).promise;
+                await Modals.permissions(`${info.name} wants to:`, info.name, permissions).promise;
             } catch (err) {
                 return;
             }
@@ -121,6 +118,10 @@ export default class extends ContentManager {
             instance.userConfig.enabled = false;
             instance.start(false);
         }
+
+        if (permissions && permissions.length)
+            await Permissions.addPluginPermissions(info.id, permissions);
+
         return instance;
     }
 

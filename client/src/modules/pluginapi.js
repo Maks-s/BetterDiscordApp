@@ -23,6 +23,7 @@ import { WebpackModules } from './webpackmodules';
 import DiscordApi from './discordapi';
 import { ReactComponents, ReactHelpers } from './reactcomponents';
 import { Patcher, MonkeyPatch } from './patcher';
+import { Permissions } from 'modules';
 
 export default class PluginApi {
 
@@ -385,7 +386,9 @@ export default class PluginApi {
      */
 
     async getPlugin(plugin_id) {
-        // This should require extra permissions
+        if (!Permissions.hasPermission(this.pluginInfo.id, 'GET_INSTALLED_COMPONENT'))
+            throw {message: 'Missing GET_INSTALLED_COMPONENT permission'};
+
         return PluginManager.waitForPlugin(plugin_id);
     }
     listPlugins() {
@@ -403,7 +406,9 @@ export default class PluginApi {
      */
 
     async getTheme(theme_id) {
-        // This should require extra permissions
+        if (!Permissions.hasPermission(this.pluginInfo.id, 'GET_INSTALLED_COMPONENT'))
+            throw {message: 'Missing GET_INSTALLED_COMPONENT permission'};
+
         return ThemeManager.waitForContent(theme_id);
     }
     listThemes() {
@@ -421,7 +426,9 @@ export default class PluginApi {
      */
 
     async getModule(module_id) {
-        // This should require extra permissions
+        if (!Permissions.hasPermission(this.pluginInfo.id, 'GET_INSTALLED_COMPONENT'))
+            throw {message: 'Missing GET_INSTALLED_COMPONENT permission'};
+
         return ExtModuleManager.waitForContent(module_id);
     }
     listModules() {
