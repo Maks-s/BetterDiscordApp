@@ -55,12 +55,14 @@ export default class {
         if (!PermissionMap[permission])
             return;
 
+        if (this.hasPermission(id, permission))
+            return;
+
         if (!this.pluginsPermissions)
             this.pluginsPermissions = [];
 
         if (!this.pluginsPermissions[id])
             this.pluginsPermissions[id] = [];
-
 
         this.pluginsPermissions[id].push(permission);
     }
