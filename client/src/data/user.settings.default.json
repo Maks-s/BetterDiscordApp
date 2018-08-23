@@ -170,6 +170,20 @@
                         "text": "Image Emote",
                         "hint": "Send single emotes as images if you have the permission",
                         "value": true
+                    },
+                    {
+                        "id": "emoteac",
+                        "type": "bool",
+                        "text": "Emote Autocomplete",
+                        "hint": "Autocomplete emotes when typing with ; prefix",
+                        "value": true
+                    },
+                    {
+                        "id": "emoteactype",
+                        "type": "bool",
+                        "text": "Show most used instead of favourites",
+                        "hint": "Toggle with arrow keys in autocomplete menu",
+                        "value": true
                     }
                 ]
             }
@@ -221,6 +235,13 @@
                         "text": "E2EE",
                         "hint": "End-to-end encryption",
                         "value": false
+                    },
+                    {
+                        "id": "use-keytar",
+                        "type": "bool",
+                        "text": "Use system keychain",
+                        "hint": "Store the master password in the system keychain",
+                        "value": true
                     }
                 ]
             },

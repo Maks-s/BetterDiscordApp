@@ -9,10 +9,10 @@
 */
 
 import { Toasts } from 'ui';
-import { EmoteModule } from 'builtin';
 import { SettingsSet } from 'structs';
 import { FileUtils, ClientLogger as Logger } from 'common';
 import path from 'path';
+import process from 'process';
 import Globals from './globals';
 import CssEditor from './csseditor';
 import Events from './events';
@@ -39,6 +39,12 @@ export default new class Settings {
 
             return set;
         });
+
+        // Set a hint for each platform for the use-keytar setting
+        const useKeytarSetting = this.getSetting('security', 'default', 'use-keytar');
+        if (process.platform === 'win32') useKeytarSetting.hint = 'Store the master password in Credential Manager';
+        if (process.platform === 'darwin') useKeytarSetting.hint = 'Store the master password in the default keychain';
+        if (process.platform === 'linux') useKeytarSetting.hint = 'Store the master password in libsecret';
     }
 
     /**
@@ -63,7 +69,6 @@ export default new class Settings {
 
             CssEditor.setState(scss, css, css_editor_files, scss_error);
             CssEditor.editor_bounds = css_editor_bounds || {};
-            EmoteModule.favourite_emotes = favourite_emotes || [];
         } catch (err) {
             // There was an error loading settings
             // This probably means that the user doesn't have any settings yet
@@ -87,8 +92,7 @@ export default new class Settings {
                 css: CssEditor.css,
                 css_editor_files: CssEditor.files,
                 scss_error: CssEditor.error,
-                css_editor_bounds: CssEditor.editor_bounds,
-                favourite_emotes: EmoteModule.favourite_emotes
+                css_editor_bounds: CssEditor.editor_bounds
             });
 
             for (const set of this.settings) {
