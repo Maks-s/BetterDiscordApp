@@ -172,7 +172,6 @@ export default new class E2EE extends BuiltinModule {
         }
     }
 
-    // TODO Received exchange should also expire if not accepted in time
     async handlePublicKey(e) {
         if (!DiscordApi.currentChannel) return;
         if (DiscordApi.currentChannel.type !== 'DM') return;
@@ -184,7 +183,15 @@ export default new class E2EE extends BuiltinModule {
         if (!Security.isBase64(key)) return;
 
         try {
-            await Modals.confirm('Key Exchange', `Key exchange request from: ${author.username}#${author.discriminator}`, 'Accept', 'Reject').promise;
+            const modal = Modals.confirm('Key Exchange', `Key exchange request from: ${author.username}#${author.discriminator}`, 'Accept', 'Reject');
+            setTimeout(() => {
+                if (!modal.closing) {
+                    modal.close();
+                    Toasts.error('Key exchange expired!');
+                }
+            }, 30000);
+            await modal.promise;
+
             // We already sent our key
             if (!ECDH_STORAGE.hasOwnProperty(channelId)) {
                 const publicKeyMessage = `\`\`\`\n-----BEGIN PUBLIC KEY-----\n${this.createKeyExchange(channelId)}\n-----END PUBLIC KEY-----\n\`\`\``;
