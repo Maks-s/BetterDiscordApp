@@ -35,7 +35,7 @@ const PermissionMap = {
     },
     GET_INSTALLED_COMPONENT: {
         HEADER: 'Use installed components',
-        BODY: 'Allows :NAME: to interact with other plugins / themes / modules'
+        BODY: 'Allows :NAME: to control other plugins / themes / modules'
     }
 }
 
@@ -51,7 +51,7 @@ export default class {
      * @param {String} permission Permission to add
      * @return {Promise}
      */
-    static async add(id, permission) {
+    static add(id, permission) {
         if (!PermissionMap[permission])
             return;
 
@@ -73,7 +73,7 @@ export default class {
      * @param {Array} permissions Array of permission to add
      * @return {Promise}
      */
-    static async addMultiple(id, permissions) {
+    static addMultiple(id, permissions) {
         for (const permission of permissions)
             this.add(id, permission);
     }
@@ -84,7 +84,7 @@ export default class {
      * @param {String} permission Permission to remove
      * @return {Promise}
      */
-    static async remove(id, permission) {
+    static remove(id, permission) {
         if (!this.data || !this.data[id])
             return;
 
@@ -101,7 +101,7 @@ export default class {
      * @param {String} id Plugin's ID
      * @return {Promise}
      */
-    static async removeAll(id) {
+    static removeAll(id) {
         if (!this.data || !this.data[id])
             return;
 

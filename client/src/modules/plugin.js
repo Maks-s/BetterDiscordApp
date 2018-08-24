@@ -32,7 +32,7 @@ export default class Plugin extends Content {
     /**
      * Saves the plugin's permissions
      */
-    async savePermissions() {
+    savePermissions() {
         try {
             const permissions = Permissions.getAll(this.id);
             if (!permissions.length)
@@ -45,7 +45,6 @@ export default class Plugin extends Content {
             });
         } catch (err) {
             Logger.err(this.name, ['Failed to save permissions', err]);
-            throw err;
         }
     }
 
