@@ -287,7 +287,7 @@ export default new class E2EE extends BuiltinModule {
 
     renderMessageContent(component, args, retVal) {
         if (!component.props.message.bd_encrypted) return;
-        const buttons = Utils.findInReactTree(retVal, m => Array.isArray(m) && m[1].props && m[1].props.currentUserId);
+        const buttons = Utils.findInReactTree(retVal, m => Array.isArray(m) && m[1] && m[1].props && m[1].props.currentUserId);
         if (!buttons) return;
         try {
             buttons.unshift(VueInjector.createReactElement(E2EEMessageButton));
