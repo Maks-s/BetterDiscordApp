@@ -181,6 +181,7 @@ export default new class E2EE extends BuiltinModule {
 
         const [tagstart, begin, key, end, tagend] = content.split('\n');
         if (begin !== '-----BEGIN PUBLIC KEY-----' || end !== '-----END PUBLIC KEY-----') return;
+        if (!Security.isBase64(key)) return;
 
         try {
             await Modals.confirm('Key Exchange', `Key exchange request from: ${author.username}#${author.discriminator}`, 'Accept', 'Reject').promise;
@@ -211,10 +212,14 @@ export default new class E2EE extends BuiltinModule {
 
             if (typeof event.message.content !== 'string') return; // Ignore any non string content
             if (!event.message.content.startsWith('$:')) return; // Not an encrypted string
+            if (!Security.isBase64(event.message.content.slice(2))) return;
             let decrypt;
             try {
                 decrypt = this.decrypt(this.decrypt(this.decrypt(seed, this.master), key), event.message.content);
             } catch (err) { return } // Ignore errors such as non empty
+
+            if (!decrypt.startsWith('true')) return;
+            decrypt = decrypt.slice(4);
 
             const MessageParser = WebpackModules.getModuleByName('MessageParser');
             const Permissions = WebpackModules.getModuleByName('GuildPermissions');
@@ -256,10 +261,14 @@ export default new class E2EE extends BuiltinModule {
 
         if (typeof component.props.message.content !== 'string') return; // Ignore any non string content
         if (!component.props.message.content.startsWith('$:')) return; // Not an encrypted string
+        if (!Security.isBase64(component.props.message.content.slice(2))) return;
         let decrypt;
         try {
             decrypt = Security.decrypt(seed, [this.master, key, component.props.message.content]);
         } catch (err) { return } // Ignore errors such as non empty
+
+        if (!decrypt.startsWith('true')) return;
+        decrypt = decrypt.slice(4);
 
         component.props.message.bd_encrypted = true; // signal as encrypted
 
@@ -382,7 +391,7 @@ export default new class E2EE extends BuiltinModule {
     handleChannelTextAreaSubmit(component, args, retVal) {
         const key = this.getKey(DiscordApi.currentChannel.id);
         if (!this.encryptNewMessages || !key) return;
-        component.props.value = Security.encrypt(Security.decrypt(seed, [this.master, key]), component.props.value, '$:');
+        component.props.value = Security.encrypt(Security.decrypt(seed, [this.master, key]), `true${component.props.value}`, '$:');
     }
 
 }
