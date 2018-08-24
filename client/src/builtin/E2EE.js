@@ -181,6 +181,14 @@ export default new class E2EE extends BuiltinModule {
         const [tagstart, begin, key, end, tagend] = content.split('\n');
         if (begin !== '-----BEGIN PUBLIC KEY-----' || end !== '-----END PUBLIC KEY-----') return;
         if (!Security.isBase64(key)) return;
+        try {
+            const ecdh = Security.createECDH();
+            Security.generateECDHKeys(ecdh);
+            Security.computeECDHSecret(ecdh, key);
+        } catch(err) {
+            console.log(err); // invalid key
+            return;
+        }
 
         try {
             const modal = Modals.confirm('Key Exchange', `Key exchange request from: ${author.username}#${author.discriminator}`, 'Accept', 'Reject');
