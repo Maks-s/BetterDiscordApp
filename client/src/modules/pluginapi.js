@@ -249,12 +249,13 @@ export default class PluginApi {
     }
     deleteStyle(id) {
         const styleid = `plugin-${this.plugin.id}-${id}`;
-        this.injectedStyles.splice(this.injectedStyles.indexOf(styleid), 1);
+        const index = this.injectedStyles.indexOf(id);
+        if (index !== -1) this.injectedStyles.splice(index, 1);
         DOM.deleteStyle(styleid);
     }
     deleteAllStyles(id) {
-        for (const id of this.injectedStyles) {
-            this.deleteStyle(id);
+        for (let i = this.injectedStyles.length - 1; i >= 0; i--) {
+            this.deleteStyle(this.injectedStyles[i]);
         }
     }
     get CssUtils() {
