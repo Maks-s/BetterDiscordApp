@@ -9,7 +9,7 @@
 */
 
 <template>
-    <SettingsWrapper headertext="Themes">
+    <SettingsWrapper headertext="Themes" :noscroller="true">
         <div class="bd-tabbar" slot="header">
             <div class="bd-button" :class="{'bd-active': local}" @click="showLocal">
                 <h3>Installed</h3>
@@ -22,15 +22,38 @@
         </div>
 
         <div class="bd-flex bd-flexCol bd-themesview">
-            <div v-if="local" class="bd-flex bd-flexGrow bd-flexCol bd-themesContainer bd-localThemes">
-                <ThemeCard v-for="theme in localThemes" :theme="theme" :key="theme.id" :data-theme-id="theme.id" @toggle-theme="toggleTheme(theme)" @reload-theme="reload => reloadTheme(theme, reload)" @show-settings="dont_clone => showSettings(theme, dont_clone)" @delete-theme="unload => deleteTheme(theme, unload)" />
+            <div v-if="local" class="bd-flex bd-flexGrow bd-flexCol bd-themesContainer bd-localPh">
+                <ScrollerWrap>
+                    <ThemeCard v-for="theme in localThemes" :theme="theme" :key="theme.id" :data-theme-id="theme.id" @toggle-theme="toggleTheme(theme)" @reload-theme="reload => reloadTheme(theme, reload)" @show-settings="dont_clone => showSettings(theme, dont_clone)" @delete-theme="unload => deleteTheme(theme, unload)" />
+                </ScrollerWrap>
             </div>
-            <div v-if="!local" class="bd-onlinePh">
-                <div class="bd-fancySearch" :class="{'bd-active': loadingOnline || (onlineThemes && onlineThemes.docs)}">
-                    <input type="text" class="bd-textInput" @keydown.enter="searchInput" @keyup.stop/>
+            <div v-else class="bd-onlinePh">
+                <div class="bd-onlinePhHeader bd-flexCol">
+                    <div class="bd-flex bd-flexRow">
+                        <div v-if="loadingOnline" class="bd-spinnerContainer">
+                            <div class="bd-spinner7" />
+                        </div>
+                        <div class="bd-searchHint">{{searchHint}}</div>
+                        <div class="bd-fancySearch" :class="{'bd-disabled': loadingOnline, 'bd-active': loadingOnline || (onlineThemes && onlineThemes.docs)}">
+                            <input type="text" class="bd-textInput" placeholder="Search" @keydown.enter="searchInput" @keyup.stop :value="onlineThemes.filters.sterm"/>
+                        </div>
+                    </div>
+                    <div class="bd-flex bd-flexRow" v-if="onlineThemes && onlineThemes.docs && onlineThemes.docs.length">
+                        <div class="bd-searchSort bd-flex bd-flexGrow">
+                            <div v-for="btn in sortBtns"
+                                 class="bd-sort"
+                                 :class="{'bd-active': onlineThemes.filters.sort === btn.toLowerCase(), 'bd-flipY': onlineThemes.filters.ascending}"
+                                 @click="sortBy(btn.toLowerCase())">{{btn}}<MiChevronDown v-if="onlineThemes.filters.sort === btn.toLowerCase()" size="18" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <h2 v-if="loadingOnline">Loading</h2>
-                <RemoteCard v-else-if="onlineThemes && onlineThemes.docs" v-for="theme in onlineThemes.docs" :key="theme.id" :item="theme"/>
+                <ScrollerWrap class="bd-onlinePhBody" v-if="!loadingOnline && onlineThemes" :scrollend="scrollend">
+                    <RemoteCard v-if="onlineThemes && onlineThemes.docs" v-for="theme in onlineThemes.docs" :key="theme.id" :item="theme" :tagClicked="searchByTag"/>
+                    <div class="bd-spinnerContainer">
+                        <div v-if="loadingMore" class="bd-spinner7"/>
+                    </div>
+                </ScrollerWrap>
             </div>
         </div>
     </SettingsWrapper>
@@ -41,7 +64,7 @@
     import { ThemeManager, BdWebApi } from 'modules';
     import { Modals } from 'ui';
     import { ClientLogger as Logger } from 'common';
-    import { MiRefresh } from '../common';
+    import { MiRefresh, ScrollerWrap, MiChevronDown } from '../common';
     import SettingsWrapper from './SettingsWrapper.vue';
     import ThemeCard from './ThemeCard.vue';
     import RemoteCard from './RemoteCard.vue';
@@ -51,15 +74,32 @@
         data() {
             return {
                 ThemeManager,
+                sortBtns: ['Updated', 'Installs', 'Users', 'Rating'],
                 local: true,
                 localThemes: ThemeManager.localThemes,
-                onlineThemes: null,
-                loadingOnline: false
+                onlineThemes: {
+                    docs: [],
+                    filters: {
+                        sterm: '',
+                        sort: 'installs',
+                        ascending: false
+                    },
+                    pagination: {
+                        total: 0,
+                        pages: 0,
+                        limit: 9,
+                        page: 1
+                    }
+                },
+                loadingOnline: false,
+                loadingMore: false,
+                searchHint: ''
             };
         },
         components: {
             SettingsWrapper, ThemeCard, RemoteCard,
-            MiRefresh,
+            MiRefresh, MiChevronDown,
+            ScrollerWrap,
             RefreshBtn
         },
         methods: {
@@ -68,44 +108,19 @@
             },
             async showOnline() {
                 this.local = false;
-                if (this.loadingOnline || this.onlineThemes) return;
             },
             async refreshLocal() {
                 await this.ThemeManager.refreshThemes();
             },
             async refreshOnline() {
+                this.searchHint = '';
+                if (this.loadingOnline || this.loadingMore) return;
                 this.loadingOnline = true;
                 try {
-                    // const getThemes = await BdWebApi.themes.get();
-                    // this.onlineThemes = JSON.parse(getThemes);
-                    const dummies = [];
-                    for (let i = 0; i < 10; i++) {
-                        dummies.push({
-                            id: `theme${i}`,
-                            name: `Dummy ${i}`,
-                            tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
-                            installs: Math.floor(Math.random() * 10000),
-                            updated: '2018-07-21T14:51:32.057Z',
-                            rating: Math.floor(Math.random() * 1000),
-                            activeUsers: Math.floor(Math.random() * 1000),
-                            rated: Math.random() > .5,
-                            version: '1.0.0',
-                            repository: {
-                                name: 'ExampleRepository',
-                                baseUri: 'https://github.com/Jiiks/ExampleRepository',
-                                rawUri: 'https://github.com/Jiiks/ExampleRepository/raw/master'
-                            },
-                            files: {
-                                readme: 'Example/readme.md',
-                                previews: [{
-                                    large: 'Example/preview1-big.png',
-                                    thumb: 'Example/preview1-small.png'
-                                }]
-                            },
-                            author: 'Jiiks'
-                        });
-                    }
-                    this.onlineThemes = { docs: dummies };
+                    const getThemes = await BdWebApi.themes.get(this.onlineThemes.filters);
+                    this.onlineThemes = getThemes;
+                    if (!this.onlineThemes.docs) return;
+                    this.searchHint = `${this.onlineThemes.pagination.total} Results`;
                 } catch (err) {
                     Logger.err('ThemesView', err);
                 } finally {
@@ -140,8 +155,46 @@
                 });
             },
             searchInput(e) {
-                this.loadingOnline = true;
-                setTimeout(this.refreshOnline, 1000);
+                if (this.loadingOnline || this.loadingMore) return;
+                this.onlineThemes.filters.sterm = e.target.value;
+                this.refreshOnline();
+            },
+            async scrollend(e) {
+                if (this.onlineThemes.pagination.page >= this.onlineThemes.pagination.pages) return;
+                if (this.loadingOnline || this.loadingMore) return;
+                this.loadingMore = true;
+
+                try {
+                    const getThemes = await BdWebApi.themes.get({
+                        sterm: this.onlineThemes.filters.sterm,
+                        page: this.onlineThemes.pagination.page + 1,
+                        sort: this.onlineThemes.filters.sort,
+                        ascending: this.onlineThemes.filters.ascending
+                    });
+
+                    this.onlineThemes.docs = [...this.onlineThemes.docs, ...getThemes.docs];
+                    this.onlineThemes.filters = getThemes.filters;
+                    this.onlineThemes.pagination = getThemes.pagination;
+                } catch (err) {
+                    Logger.err('ThemesView', err);
+                } finally {
+                    this.loadingMore = false;
+                }
+            },
+            async sortBy(by) {
+                if (this.loadingOnline || this.loadingMore) return;
+                if (this.onlineThemes.filters.sort === by) {
+                    this.onlineThemes.filters.ascending = !this.onlineThemes.filters.ascending;
+                } else {
+                    this.onlineThemes.filters.sort = by;
+                    this.onlineThemes.filters.ascending = false;
+                }
+                this.refreshOnline();
+            },
+            async searchByTag(tag) {
+                if (this.loadingOnline || this.loadingMore) return;
+                this.onlineThemes.filters.sterm = tag;
+                this.refreshOnline();
             }
         }
     }

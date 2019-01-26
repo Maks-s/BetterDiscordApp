@@ -75,7 +75,7 @@ export default class extends ContentManager {
     static get refreshPlugins() { return this.refreshContent }
 
     static get loadContent() { return this.loadPlugin }
-    static async loadPlugin(paths, configs, info, main, dependencies, permissions, mainExport) {
+    static async loadPlugin(paths, configs, info, main, dependencies, permissions, mainExport, packed = false) {
         try {
             const readPermissions = await Database.find({ type: `plugin-permissions`, id: info.id });
             if (permissions && permissions.length && readPermissions.length) {
@@ -127,10 +127,17 @@ export default class extends ContentManager {
             configs, info, main,
             paths: {
                 contentPath: paths.contentPath,
-                dirName: paths.dirName,
+                dirName: packed ? packed.packageName : paths.dirName,
                 mainPath: paths.mainPath
             }
         });
+
+        if (packed) instance.packed = {
+            pkg: packed.pkg,
+            packageName: packed.packageName,
+            packagePath: packed.packagePath,
+            packed: true
+        }; else instance.packed = false;
 
         if (instance.enabled && this.loaded) {
             instance.userConfig.enabled = false;
@@ -151,6 +158,12 @@ export default class extends ContentManager {
 
     static unloadContentHook(content, reload) {
         delete Globals.require.cache[Globals.require.resolve(content.paths.mainPath)];
+        const uncache = [];
+        for (const required in Globals.require.cache) {
+            if (!required.includes(content.paths.contentPath)) continue;
+            uncache.push(Globals.require.resolve(required));
+        }
+        for (const u of uncache) delete Globals.require.cache[u];
     }
 
     /**

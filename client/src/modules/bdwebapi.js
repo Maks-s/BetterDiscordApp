@@ -8,6 +8,8 @@
  * LICENSE file in the root directory of this source tree.
 */
 
+import ServerEmu from '../dev/serveremu';
+
 import { request } from 'vendor';
 
 const APIBASE = 'ifyouareinwebtestthenyouknowwhatthisshouldbe'; // Do not push
@@ -27,6 +29,12 @@ export default class BdWebApi {
         };
     }
 
+    static get plugins() {
+        return {
+            get: this.getPlugins
+        };
+    }
+
     static get users() {
         return {
             get: this.getUsers
@@ -41,11 +49,19 @@ export default class BdWebApi {
     }
 
     static getThemes(args) {
+        return ServerEmu.themes(args);
+        //  return dummyThemes();
+        /*
         if (!args) return request.get(ENDPOINTS.themes);
         const { id } = args;
         if (id) return request.get(ENDPOINTS.theme(id));
 
         return request.get(ENDPOINTS.themes);
+        */
+    }
+
+    static getPlugins(args) {
+        return ServerEmu.plugins(args);
     }
 
     static getUsers(args) {
