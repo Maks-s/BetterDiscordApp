@@ -78,9 +78,7 @@ class Comms {
         // BDIpc.on('bd-openCssEditor', (event, options) => this.bd.editor.openEditor(options), true);
 
         BDIpc.on('bd-native-open', (event, options) => {
-            dialog.showOpenDialog(OriginalBrowserWindow.fromWebContents(event.ipcEvent.sender), options, filenames => {
-                event.reply(filenames);
-            });
+            event.reply(dialog.showOpenDialog(OriginalBrowserWindow.fromWebContents(event.ipcEvent.sender), options));
         });
 
         BDIpc.on('bd-compileSass', (event, options) => {
