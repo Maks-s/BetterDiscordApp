@@ -14,6 +14,7 @@ import semver from 'semver';
 import Axi from './axi';
 import zlib from 'zlib';
 import tarfs from 'tar-fs';
+import path from 'path';
 
 const TEST_UPDATE = [
     {
@@ -95,7 +96,8 @@ export default class Updater extends Module {
             }
 
             console.log('[BetterDiscord:Updater] Updating', update.id);
-            await this.downloadTarGz(`https://github.com/JsSucks/BetterDiscordApp${update.remote}`, this.bd.config.getPath('base'));
+            await this.downloadTarGz(`https://github.com/JsSucks/BetterDiscordApp${update.remote}`, this.bd.config.getPath('tmp'));
+            await FileUtils.rn(path.join(this.bd.config.getPath('tmp'), update.id), this.bd.config.getPath(update.id));
             this.updateFinished(update);
             // Cleanup
             await FileUtils.rm(`${this.bd.config.getPath(update.id)}_old`);

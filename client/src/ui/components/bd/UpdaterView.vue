@@ -19,7 +19,7 @@
                     <div class="bd-formDivider"></div>
                     <div v-for="update in bdUpdates">
                         <UpdaterStatus :item="update" :disabled="isDisabled(update)" v-if="update.status.updating || isDisabled(update)" />
-                        <UpdaterToggle :item="update" :toggle="() => updater.toggleUpdate(update)" v-else />
+                        <UpdaterToggle :item="update" @toggle="updater.toggleUpdate(update)" v-else />
                         <div class="bd-formDivider"></div>
                     </div>
                 </div>
