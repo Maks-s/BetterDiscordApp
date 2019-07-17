@@ -276,7 +276,7 @@ export default class DOM {
     }
 
     static injectStyle(css, id) {
-        const style = Array.from(this.bdStyles.children).find(e => e.id === id) || this.createElement('style', null, id).element;
+        const style = Array.from(this.bdStyles.children).find(e => e.id === id) || this.createElement('style', {id}).element;
         style.textContent = css;
         this.bdStyles.append(style);
     }
@@ -292,7 +292,7 @@ export default class DOM {
     }
 
     static injectTheme(css, id) {
-        const style = Array.from(this.bdThemes.children).find(e => e.id === id) || this.createElement('style', null, id).element;
+        const style = Array.from(this.bdThemes.children).find(e => e.id === id) || this.createElement('style', {id}).element;
         style.textContent = css;
         this.bdThemes.append(style);
     }
@@ -306,8 +306,8 @@ export default class DOM {
     }
 
     static setAttributes(node, attributes) {
-        for (const attribute of attributes) {
-            node.setAttribute(attribute.name, attribute.value);
+        for (const attribute in attributes) {
+            node.setAttribute(attribute, attributes[attribute]);
         }
     }
 

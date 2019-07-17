@@ -55,11 +55,11 @@ export default class {
     }
 
     static injectUi() {
-        DOM.createElement('div', null, 'bd-settings').appendTo(DOM.bdBody);
-        DOM.createElement('div', null, 'bd-modals').appendTo(DOM.bdModals);
-        DOM.createElement('div', null, 'bd-toasts').appendTo(DOM.bdToasts);
-        DOM.createElement('div', null, 'bd-notifications').appendTo(DOM.bdNotifications);
-        DOM.createElement('div', null, 'bd-contextmenu').appendTo(DOM.bdContextMenu);
+        DOM.createElement('div', {id: 'bd-settings'}).appendTo(DOM.bdBody);
+        DOM.createElement('div', {id: 'bd-modals'}).appendTo(DOM.bdModals);
+        DOM.createElement('div', {id: 'bd-toasts'}).appendTo(DOM.bdToasts);
+        DOM.createElement('div', {id: 'bd-notifications'}).appendTo(DOM.bdNotifications);
+        DOM.createElement('div', {id: 'bd-contextmenu'}).appendTo(DOM.bdContextMenu);
         DOM.createElement('bd-tooltips').appendTo(DOM.bdBody);
 
         this.toasts = new (Vue.extend(BdToasts))({
