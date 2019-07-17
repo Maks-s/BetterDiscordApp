@@ -309,6 +309,9 @@ export default class {
             if (!reload && this.getContentById(content.id))
                 throw { message: `A ${this.contentType} with the ID ${content.id} already exists.` };
 
+            if (!reload && readConfig.permissions && readConfig.permissions.length && content.type === 'plugin')
+                content.savePermissions();
+
             for (const setting of userConfig.config.findSettings(() => true)) {
                 // This will load custom settings
                 // Setting the content's path on only the live config (and not the default config) ensures that custom settings will not be loaded on the default settings
@@ -337,7 +340,7 @@ export default class {
         if (!content) throw {message: `Could not find a ${this.contentType} from ${content}.`};
 
         try {
-            await Modals.confirm(`Delete ${this.contentType}?`, `Are you sure you want to delete ${content.info.name} ?`, 'Delete').promise;
+            await Modals.confirm(`Delete ${this.contentType} ?`, `Are you sure you want to delete ${content.info.name} ?`, 'Delete').promise;
         } catch (err) {
             return false;
         }
