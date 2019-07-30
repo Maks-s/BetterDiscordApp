@@ -305,8 +305,9 @@ export class BetterDiscord {
 
     async init() {
         console.log('[BetterDiscord] init');
-        await this.waitForWindowUtils();
+
         await this.ensureDirectories();
+        await this.waitForWindowUtils();
 
         this.windowUtils.on('did-finish-load', () => this.injectScripts(true));
 
